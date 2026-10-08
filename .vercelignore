@@ -4,3 +4,5 @@
 tests
 gitbook
 .codex-vercel
+.agents
+skills-lock.json
