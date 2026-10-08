@@ -1,0 +1,8 @@
+.git
+.env*
+!.env.example
+tests
+gitbook
+.codex-vercel
+.agents
+skills-lock.json
