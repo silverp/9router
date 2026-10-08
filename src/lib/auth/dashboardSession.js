@@ -11,6 +11,9 @@ const SESSION_MAX_AGE_SEC = 24 * 60 * 60;
 
 function loadJwtSecret() {
   if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  if (process.env.VERCEL === "1") {
+    throw new Error("JWT_SECRET must be configured on Vercel so all functions share the same session key");
+  }
   const file = path.join(DATA_DIR, "jwt-secret");
   try {
     return fs.readFileSync(file, "utf8").trim();
@@ -22,6 +25,10 @@ function loadJwtSecret() {
 }
 
 const SECRET = new TextEncoder().encode(loadJwtSecret());
+
+if (process.env.VERCEL === "1" && !process.env.INITIAL_PASSWORD) {
+  throw new Error("INITIAL_PASSWORD must be configured on Vercel before exposing the dashboard");
+}
 
 export function shouldUseSecureCookie(request) {
   const forceSecureCookie = process.env.AUTH_COOKIE_SECURE === "true";

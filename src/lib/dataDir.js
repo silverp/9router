@@ -5,6 +5,9 @@ import os from "os";
 const APP_NAME = "9router";
 
 function defaultDir() {
+  // Vercel's home directory is not writable. This is scratch storage only;
+  // durable application state requires an external database.
+  if (process.env.VERCEL === "1") return path.join(os.tmpdir(), APP_NAME);
   if (process.platform === "win32") {
     return path.join(process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"), APP_NAME);
   }
@@ -26,8 +29,8 @@ export function getDataDir() {
     fs.mkdirSync(configured, { recursive: true });
     return configured;
   } catch (e) {
-    if (e?.code === "EACCES" || e?.code === "EPERM") {
-      console.warn(`[DATA_DIR] '${configured}' not writable → fallback ~/.${APP_NAME}`);
+    if (["EACCES", "EPERM", "EROFS", "ENOENT"].includes(e?.code)) {
+      console.warn(`[DATA_DIR] '${configured}' unavailable → fallback ${defaultDir()}`);
       return defaultDir();
     }
     throw e;
